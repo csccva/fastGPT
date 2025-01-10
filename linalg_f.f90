@@ -7,12 +7,6 @@ integer, parameter :: sp = kind(0.0)
 
 contains
 
-    ! subroutine matmul_2d(A, B, C)
-    ! real(sp), intent(in) :: A(:,:), B(:,:)
-    ! real(sp), intent(out) :: C(:,:)
-
-    ! C = matmul(A, B)
-    ! end subroutine
     subroutine matmul_2d(A, B, C)
         implicit none
         real(sp), intent(in) :: A(:,:), B(:,:)
@@ -26,7 +20,8 @@ contains
 
         C = 0.0_sp
         
-        !$omp parallel do private(i, j, k) shared(A, B, C)
+        !!!$omp parallel do private(i, j, k) shared(A, B, C)
+        !$omp target teams distribute simd
         do i = 1, n
          do j = 1, p
             do k = 1, m
@@ -34,7 +29,8 @@ contains
             end do
          end do
         end do
-        !$omp end parallel do
+        !$omp end target teams distribute simd
+        !!!$omp end parallel do
     end subroutine matmul_2d
 
     subroutine matmul_2d_t(A, B, C)
@@ -50,7 +46,8 @@ contains
 
         C = 0.0_sp
 
-        !$omp parallel do private(i, j, k) shared(A, B, C)
+        !!!$omp parallel do private(i, j, k) shared(A, B, C)
+        !$omp target teams distribute simd
         do i = 1, n
           do j = 1, p
             do k = 1, m
@@ -58,15 +55,8 @@ contains
             end do
          end do
         end do
-        !$omp end parallel do
+        !$omp end target teams distribute simd
+        !!!$omp end parallel do
     end subroutine matmul_2d_t
-
-    ! subroutine matmul_2d_t(A, B, C)
-    ! real(sp), intent(in) :: A(:,:), B(:,:)
-    ! real(sp), intent(out) :: C(:,:)
-
-    ! C = matmul(transpose(A), B)
-
-    ! end subroutine
 
 end module
