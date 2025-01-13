@@ -1,4 +1,4 @@
-# Set default target system
+ # Set default target system
 ifeq ($(COMP),)
     COMP = lumi_cray
 endif
@@ -6,22 +6,28 @@ endif
 # Select compiler based on target system
 ifeq ($(COMP),gnu)
     FC = gfortran
-	FFLAGS = -fopenmp -O2
+    FFLAGS = -fopenmp -O2
+    CC = g++
+    CFLAGS = -fopenmp -O2
 endif
 ifeq ($(COMP),lumi_cray)
-    FC = ftn 
-	FFLAGS =-O2  -fopenmp  
+    FC = ftn
+    FFLAGS = -O2 -fopenmp
+    CC = CC
+    CFLAGS = -O2
 endif
 ifeq ($(COMP),lumi_amd_new)
-    FC = amdflang-new 
-	FFLAGS = -O2  -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa --offload-arch=gfx90a
+    FC = amdflang-new
+    FFLAGS = -O2 -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa --offload-arch=gfx90a
+    CC = hipcc
+    CFLAGS = -O2 --offload-arch=gfx90a
 endif
 
-
-
 # Sources and objects
+SRC_CC := matrix_multiply_2d_gpu.cc
 SRCS = linalg_f.f90 tokenizer.f90 gpt2.f90 omp.f90 driver.f90
-OBJS = $(SRCS:.f90=.o)
+OBJ_CC := $(SRC_CC:.cc=.o)
+OBJS = $(SRCS:.f90=.o) $(OBJ_CC)
 
 # Static library
 LIB = libfastgpt.a
@@ -32,9 +38,13 @@ EXECUTABLES = gpt2 chat test_basic_input test_more_inputs test_chat
 # Default target
 all: $(EXECUTABLES)
 
-# Compile source files
+# Compile Fortran source files
 %.o: %.f90
 	$(FC) $(FFLAGS) -c $< -o $@
+
+# Compile C++ source files
+%.o: %.cc
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Static library
 $(LIB): $(OBJS)

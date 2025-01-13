@@ -4,12 +4,13 @@ use omp_lib
 implicit none
     
 interface
-    subroutine matrix_multiply_gpu(h_matrix_a, h_matrix_b, h_matrix_c, N, M, K) bind(c, name="matrix_multiply_gpu")
-    import
+    subroutine matrix_multiply_2d_gpu(h_matrix_a, h_matrix_b, h_matrix_c, N, M, K) &
+                                 bind(c, name="matrix_multiply_2d_gpu")
+        use iso_c_binding
         real, dimension(:), intent(in) :: h_matrix_a, h_matrix_b
         real, dimension(:), intent(out) :: h_matrix_c
         integer, intent(in) :: N, M, K
-    end subroutine matrix_multiply_gpu
+    end subroutine matrix_multiply_2d_gpu
 end interface
 
 integer, parameter :: sp = kind(0.0)
@@ -20,19 +21,19 @@ contains
         implicit none
         real(sp), intent(in) :: A(:,:), B(:,:)
         real(sp), intent(out) :: C(:,:) ! real(sp), intent(out) :: C(size(A,1), size(B,2))
-        integer :: i, j, k
-        integer :: n, m, p
+        integer :: ii, jj, kk
+        integer :: n, m, k
 
         n = size(A, 1)
-        m = size(A, 2)
-        p = size(B, 2)
+        k = size(A, 2)
+        m = size(B, 2)
         ! write(*,*) n,m,p
         C = 0.0_sp
         
-        do i = 1, n
-         do j = 1, p
-            do k = 1, m
-                C(i, j) = C(i, j) + A(i, k) * B(k, j)
+        do ii = 1, n
+         do jj = 1, m
+            do kk = 1, k
+                C(ii, jj) = C(ii, jj) + A(ii, kk) * B(kk, jj)
             end do
          end do
         end do
