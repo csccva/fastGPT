@@ -2,6 +2,15 @@ module linalg
 use omp_lib
 ! Pure Fortran implementation of the matmul routines
 implicit none
+    
+interface
+    subroutine matrix_multiply_gpu(h_matrix_a, h_matrix_b, h_matrix_c, N, M, K) bind(c, name="matrix_multiply_gpu")
+    import
+        real, dimension(:), intent(in) :: h_matrix_a, h_matrix_b
+        real, dimension(:), intent(out) :: h_matrix_c
+        integer, intent(in) :: N, M, K
+    end subroutine matrix_multiply_gpu
+end interface
 
 integer, parameter :: sp = kind(0.0)
 
@@ -17,11 +26,9 @@ contains
         n = size(A, 1)
         m = size(A, 2)
         p = size(B, 2)
-
+        ! write(*,*) n,m,p
         C = 0.0_sp
         
-        !!!$omp parallel do private(i, j, k) shared(A, B, C)
-        !$omp target teams distribute simd
         do i = 1, n
          do j = 1, p
             do k = 1, m
@@ -29,8 +36,7 @@ contains
             end do
          end do
         end do
-        !$omp end target teams distribute simd
-        !!!$omp end parallel do
+        
     end subroutine matmul_2d
 
     subroutine matmul_2d_t(A, B, C)
@@ -45,9 +51,7 @@ contains
         p = size(B, 2)
 
         C = 0.0_sp
-
-        !!!$omp parallel do private(i, j, k) shared(A, B, C)
-        !$omp target teams distribute simd
+        !write(*,*) n,m,p
         do i = 1, n
           do j = 1, p
             do k = 1, m
@@ -55,8 +59,7 @@ contains
             end do
          end do
         end do
-        !$omp end target teams distribute simd
-        !!!$omp end parallel do
+
     end subroutine matmul_2d_t
 
 end module

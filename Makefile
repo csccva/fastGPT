@@ -6,13 +6,18 @@ endif
 # Select compiler based on target system
 ifeq ($(COMP),gnu)
     FC = gfortran
+	FFLAGS = -fopenmp -O2
 endif
 ifeq ($(COMP),lumi_cray)
-    FC = ftn
+    FC = ftn 
+	FFLAGS =-O2  -fopenmp  
+endif
+ifeq ($(COMP),lumi_amd_new)
+    FC = amdflang-new 
+	FFLAGS = -O2  -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa --offload-arch=gfx90a
 endif
 
-# Compiler flags
-FFLAGS = -fopenmp -O3
+
 
 # Sources and objects
 SRCS = linalg_f.f90 tokenizer.f90 gpt2.f90 omp.f90 driver.f90
