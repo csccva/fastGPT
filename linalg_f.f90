@@ -29,7 +29,7 @@ contains
         m = size(B, 2)
         ! write(*,*) n,m,p
         C = 0.0_sp
-        
+        !#omp target teams distribute simd
         do ii = 1, n
          do jj = 1, m
             do kk = 1, k
@@ -37,6 +37,7 @@ contains
             end do
          end do
         end do
+        !#omp end target teams distribute simd
         
     end subroutine matmul_2d
 
